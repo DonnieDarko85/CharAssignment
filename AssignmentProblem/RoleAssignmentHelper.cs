@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using MatrixCalculations;
+using Microsoft.VisualBasic.FileIO;
 
 /********************************************************************************
  *                        Assignment Problem Solver
@@ -209,9 +210,14 @@ namespace AssignmentProblem
 		/// Adds new job to the table
 		/// </summary>
 		/// <param name="p_jobName">Optional name for the new job</param>
-		private void AddJob(string p_taskName = "")
+		private void AddJob(string p_taskName = "", string p_posId = "")
 		{
 			Task newTask = new Task(p_taskName);
+
+            if (!string.IsNullOrEmpty(p_posId)){
+                newTask.PgNumber = p_posId;
+            }
+
 			m_tasks.Add(newTask);
 
 			string statusMessage = "New " + m_preferences.Task + " (# " + (m_tasks.Count - 1).ToString() + ") added";
@@ -254,7 +260,14 @@ namespace AssignmentProblem
 			for (int i = 0; i < m_tasks.Count; i++)
 			{
 				m_tasks[i].PosID = i;
-				MainTable.Columns[i].Name = m_tasks[i].GetIDName();
+                if (string.IsNullOrEmpty(MainTable.Columns[i].Name))
+                {
+                    MainTable.Columns[i].Name = m_tasks[i].GetIDName();
+                }
+                else
+                {
+                    MainTable.Columns[i].Name = m_tasks[i].GetNumberAndName();
+                }
 				MainTable.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
 			}
 
@@ -768,8 +781,8 @@ namespace AssignmentProblem
 
                 if (m_agents[i].Name.Equals("dummy")) continue;
 
-                toRemoveOutput += m_tasks[index].PosID + _separator + m_tasks[index].Name + "\n";
-                assignmentOutput += m_agents[i].PosID + _separator + m_agents[i].Name + _separator + m_tasks[index].PosID + _separator + m_tasks[index].Name + "\n";
+                toRemoveOutput += m_tasks[index].GetNumberAndName() + "\n";
+                assignmentOutput += m_agents[i].Name + _separator + m_tasks[index].GetNumberAndName() + "\n";
 	        }
 
 	        File.WriteAllText(fileName, assignmentOutput);
@@ -785,14 +798,14 @@ namespace AssignmentProblem
                 RestoreDirectory = true
             };
 
-            if (openFileDialog.ShowDialog() != DialogResult.OK)
-            {
-                return;
-            }
+            if (openFileDialog.ShowDialog() != DialogResult.OK) return;
 
-            var allChar = File.ReadAllLines(openFileDialog.FileName);
+            m_tasks.Clear();
+            m_agents.Clear();
 
-            foreach (var pg in allChar)
+            var allPg = File.ReadAllLines(openFileDialog.FileName);
+
+            foreach (var pg in allPg)
             {
                 var splitted = pg.Split('|');
                 if (splitted.Length != 2)
@@ -800,8 +813,78 @@ namespace AssignmentProblem
                     SetStatus("Bad format of file " + openFileDialog.FileName);
                     break;
                 }
-                AddJob(splitted[1].Trim());
+                AddJob(splitted[1].Trim(), splitted[0].Trim());
             }
+
+            RebuildGrid();
+        }
+
+        private void ImportPrefButton_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "csv files (*.csv)|*.csv",
+                FilterIndex = 2,
+                RestoreDirectory = true
+            };
+
+            if (openFileDialog.ShowDialog() != DialogResult.OK) return;
+
+            m_agents.Clear();
+
+            TextFieldParser parser = new TextFieldParser(openFileDialog.FileName)
+            {
+                TextFieldType = FieldType.Delimited
+            };
+
+            parser.SetDelimiters(",");            
+            while (!parser.EndOfData)
+            {
+                //Processing row
+                string[] fields = parser.ReadFields();
+                //Create player
+                Agent newAgent = new Agent(fields[0]);
+                for (int i = 1; i < fields.Length; i++){
+                    //Preferences
+                    if(i < m_preferences.MaxPreferences)
+                    {
+                        var prefTask = SplitAndFindTask(fields[i]);
+                        if (prefTask != null)
+                        {
+                            newAgent.AddPreferredTask(prefTask);
+                        }
+                    }//Dislikes
+                    else
+                    {
+                        var impTask = SplitAndFindTask(fields[i]);
+                        if (impTask != null)
+                        {
+                            newAgent.AddImpossibleTask(impTask);
+                        }
+                    }
+                }
+                //Add to set of agents the new created one
+                m_agents.Add(newAgent);                
+            }
+
+            //Rebuild for visualization
+            RebuildGrid();
+        }
+
+        private Task SplitAndFindTask(string complexName)
+        {
+            var splitted = complexName.Split('|');
+            if (splitted.Length != 2)
+            {
+                SetStatus("Bad format of imported file");
+                return null;
+            }
+            return m_tasks.Find(x => x.Equals(new Task(splitted[1].Trim())));
+        }
+
+        private void ModifyAgentButton_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

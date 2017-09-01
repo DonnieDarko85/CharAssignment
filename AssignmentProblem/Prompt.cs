@@ -123,7 +123,7 @@ namespace AssignmentProblem
 				newDropDown.Items.Add("none");
 				foreach (Task task in p_tasks)
 				{
-					newDropDown.Items.Add(task.GetIDName());
+					newDropDown.Items.Add(task.GetNumberAndName());
 				}
 				newDropDown.SelectedIndex = 0;
 
@@ -144,7 +144,7 @@ namespace AssignmentProblem
 				newDropDown.Items.Add("none");
 				foreach (Task task in p_tasks)
 				{
-					newDropDown.Items.Add(task.GetIDName());
+					newDropDown.Items.Add(task.GetNumberAndName());
 				}
 				newDropDown.SelectedIndex = 0;
 

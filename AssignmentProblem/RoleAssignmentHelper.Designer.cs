@@ -206,6 +206,7 @@
             this.ModifyAgentButton.TabIndex = 14;
             this.ModifyAgentButton.Text = "Modify player";
             this.ModifyAgentButton.UseVisualStyleBackColor = true;
+            this.ModifyAgentButton.Click += new System.EventHandler(this.ModifyAgentButton_Click);
             // 
             // DeleteAgentButton
             // 
@@ -285,6 +286,7 @@
             this.ImportPrefButton.TabIndex = 22;
             this.ImportPrefButton.Text = "Import Pref.";
             this.ImportPrefButton.UseVisualStyleBackColor = true;
+            this.ImportPrefButton.Click += new System.EventHandler(this.ImportPrefButton_Click);
             // 
             // RoleAssignmentHelper
             // 

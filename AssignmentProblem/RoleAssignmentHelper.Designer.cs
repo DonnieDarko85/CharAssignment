@@ -47,9 +47,10 @@
             this.button3 = new System.Windows.Forms.Button();
             this.OptionsButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.ImportButton = new System.Windows.Forms.Button();
+            this.ImportPGButton = new System.Windows.Forms.Button();
             this.ExportButton = new System.Windows.Forms.Button();
             this.DummyFillButton = new System.Windows.Forms.Button();
+            this.ImportPrefButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.MainTable)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,7 +63,7 @@
             this.MainTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.MainTable.Location = new System.Drawing.Point(12, 106);
             this.MainTable.Name = "MainTable";
-            this.MainTable.Size = new System.Drawing.Size(1221, 607);
+            this.MainTable.Size = new System.Drawing.Size(1326, 607);
             this.MainTable.TabIndex = 0;
             this.MainTable.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.MainTable_ColumnHeaderMouseClick);
             this.MainTable.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.MainTable_RowHeaderMouseClick);
@@ -246,22 +247,22 @@
             this.label1.TabIndex = 18;
             this.label1.Text = "Set DataGrid and\r\ncalculation options";
             // 
-            // ImportButton
+            // ImportPGButton
             // 
-            this.ImportButton.Location = new System.Drawing.Point(1133, 10);
-            this.ImportButton.Name = "ImportButton";
-            this.ImportButton.Size = new System.Drawing.Size(100, 25);
-            this.ImportButton.TabIndex = 19;
-            this.ImportButton.Text = "Import";
-            this.ImportButton.UseVisualStyleBackColor = true;
+            this.ImportPGButton.Location = new System.Drawing.Point(1133, 10);
+            this.ImportPGButton.Name = "ImportPGButton";
+            this.ImportPGButton.Size = new System.Drawing.Size(100, 25);
+            this.ImportPGButton.TabIndex = 19;
+            this.ImportPGButton.Text = "Import PG";
+            this.ImportPGButton.UseVisualStyleBackColor = true;
             // 
             // ExportButton
             // 
-            this.ExportButton.Location = new System.Drawing.Point(1133, 41);
+            this.ExportButton.Location = new System.Drawing.Point(1238, 70);
             this.ExportButton.Name = "ExportButton";
             this.ExportButton.Size = new System.Drawing.Size(100, 25);
             this.ExportButton.TabIndex = 20;
-            this.ExportButton.Text = "Export";
+            this.ExportButton.Text = "Export Result";
             this.ExportButton.UseVisualStyleBackColor = true;
             this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
             // 
@@ -275,14 +276,24 @@
             this.DummyFillButton.UseVisualStyleBackColor = true;
             this.DummyFillButton.Click += new System.EventHandler(this.DummyFillButton_Click);
             // 
+            // ImportPrefButton
+            // 
+            this.ImportPrefButton.Location = new System.Drawing.Point(1133, 39);
+            this.ImportPrefButton.Name = "ImportPrefButton";
+            this.ImportPrefButton.Size = new System.Drawing.Size(100, 25);
+            this.ImportPrefButton.TabIndex = 22;
+            this.ImportPrefButton.Text = "Import Pref.";
+            this.ImportPrefButton.UseVisualStyleBackColor = true;
+            // 
             // RoleAssignmentHelper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1245, 738);
+            this.ClientSize = new System.Drawing.Size(1350, 738);
+            this.Controls.Add(this.ImportPrefButton);
             this.Controls.Add(this.DummyFillButton);
             this.Controls.Add(this.ExportButton);
-            this.Controls.Add(this.ImportButton);
+            this.Controls.Add(this.ImportPGButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.OptionsButton);
             this.Controls.Add(this.button3);
@@ -331,9 +342,10 @@
 		private System.Windows.Forms.Button button3;
 		private System.Windows.Forms.Button OptionsButton;
 		private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button ImportButton;
+        private System.Windows.Forms.Button ImportPGButton;
         private System.Windows.Forms.Button ExportButton;
         private System.Windows.Forms.Button DummyFillButton;
+        private System.Windows.Forms.Button ImportPrefButton;
 	}
 }
 

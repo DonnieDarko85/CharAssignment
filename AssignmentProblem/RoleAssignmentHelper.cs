@@ -69,6 +69,12 @@ namespace AssignmentProblem
 		#endregion
 
 		#region variables
+
+        /// <summary>
+        /// CSV separator, use comma per default options
+        /// </summary>
+        private static string _separator = ",";
+
 		/// <summary>
 		/// List containing all tasks, identified by GUID
 		/// </summary>
@@ -96,7 +102,7 @@ namespace AssignmentProblem
 		/// <summary>
 		/// Cost of non-preferred tasks is this factor times #maximum preferences
 		/// </summary>
-		private int m_nonPreferenceFactor = 2;
+		private int m_nonPreferenceFactor = 5;
 
 		/// <summary>
 		/// Cost of impossible tasks is this factor times #maximum preferences
@@ -134,10 +140,12 @@ namespace AssignmentProblem
 			}
 		}
 
+        private static int _lastAgentUsedIndex;
+
 		private void AddRandomAgentButton_Click(object sender, EventArgs e)
 		{
 			Random rnd = new Random();
-			Agent newAgent = new Agent("Test");
+            Agent newAgent = new Agent("Giocatore " + _lastAgentUsedIndex++);
 			Task currentTask;
 
 			for (int i = 0; i < Math.Min(m_preferences.MaxPreferences, m_tasks.Count); i++)
@@ -760,12 +768,14 @@ namespace AssignmentProblem
 
                 if (m_agents[i].Name.Equals("dummy")) continue;
 
-                toRemoveOutput += m_tasks[index].Name + "\n";
-                assignmentOutput += m_agents[i].Name + ";" + m_tasks[index].Name + "\n";
+                toRemoveOutput += m_tasks[index].PosID + _separator + m_tasks[index].Name + "\n";
+                assignmentOutput += m_agents[i].PosID + _separator + m_agents[i].Name + _separator + m_tasks[index].PosID + _separator + m_tasks[index].Name + "\n";
 	        }
 
 	        File.WriteAllText(fileName, assignmentOutput);
             File.WriteAllText(fileName.Replace(".csv", "") + "_assigned.csv", toRemoveOutput);
 	    }
-	}
+    }
+
+   
 }

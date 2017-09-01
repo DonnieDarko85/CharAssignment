@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 namespace AssignmentProblem
 {
 	public class Task: NamedEntity
-	{
-		public Task(string p_name)
+    {
+        private static int _lastUsedIndex;
+
+		public Task(string pName)
 		{
-			Name = p_name;
+		    Name = string.IsNullOrEmpty(pName) ? "PG " + _lastUsedIndex++ : pName;
 		}
-	}
+    }
 }

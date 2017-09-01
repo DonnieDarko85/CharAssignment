@@ -255,6 +255,7 @@
             this.ImportPGButton.TabIndex = 19;
             this.ImportPGButton.Text = "Import PG";
             this.ImportPGButton.UseVisualStyleBackColor = true;
+            this.ImportPGButton.Click += new System.EventHandler(this.ImportPGButton_Click);
             // 
             // ExportButton
             // 

@@ -775,6 +775,34 @@ namespace AssignmentProblem
 	        File.WriteAllText(fileName, assignmentOutput);
             File.WriteAllText(fileName.Replace(".csv", "") + "_assigned.csv", toRemoveOutput);
 	    }
+
+        private void ImportPGButton_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "txt files (*.txt)|*.txt",
+                FilterIndex = 2,
+                RestoreDirectory = true
+            };
+
+            if (openFileDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            var allChar = File.ReadAllLines(openFileDialog.FileName);
+
+            foreach (var pg in allChar)
+            {
+                var splitted = pg.Split('|');
+                if (splitted.Length != 2)
+                {
+                    SetStatus("Bad format of file " + openFileDialog.FileName);
+                    break;
+                }
+                AddJob(splitted[1].Trim());
+            }
+        }
     }
 
    

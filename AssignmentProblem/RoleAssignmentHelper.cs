@@ -782,11 +782,12 @@ namespace AssignmentProblem
                 if (m_agents[i].Name.Equals("dummy")) continue;
 
                 toRemoveOutput += m_tasks[index].GetNumberAndName() + "\n";
-                assignmentOutput += m_agents[i].Name + _separator + m_tasks[index].GetNumberAndName() + "\n";
+	            assignmentOutput += m_agents[i].Name + _separator + m_tasks[index].GetNumberAndName() + _separator +
+                                    (m_agents[i].PreferredTasks.IndexOf(m_tasks[index]) + 1) + "\n";
 	        }
 
-	        File.WriteAllText(fileName, assignmentOutput);
-            File.WriteAllText(fileName.Replace(".csv", "") + "_assigned.csv", toRemoveOutput);
+	        File.WriteAllText(fileName, assignmentOutput, Encoding.UTF8);
+            File.WriteAllText(fileName.Replace(".csv", "") + "_assigned.csv", toRemoveOutput, Encoding.UTF8);
 	    }
 
         private void ImportPGButton_Click(object sender, EventArgs e)
@@ -805,15 +806,19 @@ namespace AssignmentProblem
 
             var allPg = File.ReadAllLines(openFileDialog.FileName);
 
-            foreach (var pg in allPg)
+            foreach (var splitted in allPg.Select(pg => pg.Split('|')))
             {
-                var splitted = pg.Split('|');
                 if (splitted.Length != 2)
                 {
                     SetStatus("Bad format of file " + openFileDialog.FileName);
                     break;
                 }
                 AddJob(splitted[1].Trim(), splitted[0].Trim());
+            }
+
+            if (MainTable.Rows.Count > 0)
+            {
+                MainTable.AutoResizeRowHeadersWidth(0, DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders);
             }
 
             RebuildGrid();
@@ -832,19 +837,24 @@ namespace AssignmentProblem
 
             m_agents.Clear();
 
-            TextFieldParser parser = new TextFieldParser(openFileDialog.FileName)
+            var parser = new TextFieldParser(openFileDialog.FileName)
             {
                 TextFieldType = FieldType.Delimited
             };
 
-            parser.SetDelimiters(",");            
+            parser.SetDelimiters(",");
+            //Discard first line
+            parser.ReadLine();
+
             while (!parser.EndOfData)
             {
                 //Processing row
-                string[] fields = parser.ReadFields();
+                var fields = parser.ReadFields();
+                if (fields == null) continue;
+
                 //Create player
-                Agent newAgent = new Agent(fields[0]);
-                for (int i = 1; i < fields.Length; i++){
+                var newAgent = new Agent(fields[2]);
+                for (var i = 3; i < fields.Length; i++){
                     //Preferences
                     if(i < m_preferences.MaxPreferences)
                     {
@@ -874,12 +884,11 @@ namespace AssignmentProblem
         private Task SplitAndFindTask(string complexName)
         {
             var splitted = complexName.Split('|');
-            if (splitted.Length != 2)
-            {
-                SetStatus("Bad format of imported file");
-                return null;
-            }
-            return m_tasks.Find(x => x.Equals(new Task(splitted[1].Trim())));
+            if (splitted.Length == 2) return m_tasks.Find(x => x.Equals(new Task(splitted[1].Trim())));
+
+            //Error
+            SetStatus("Bad format of imported file");
+            return null;
         }
 
         private void ModifyAgentButton_Click(object sender, EventArgs e)

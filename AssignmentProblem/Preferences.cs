@@ -12,7 +12,7 @@ namespace AssignmentProblem
 		public const string c_defaultAgent = "player";
 		public const int c_defaultMaxPreferences = 8;
 		public const int c_defaultMaxDislikes = 0;
-		public const int c_defaultMaxImpossible = 3;
+		public const int c_defaultMaxImpossible = 4;
 		public const bool c_preferencesOrdered = true;
 		public const bool c_dislikesOrdered = true;
 		public const int c_costImpossible = 1000;

@@ -854,28 +854,24 @@ namespace AssignmentProblem
 
                 //Create player
                 var newAgent = new Agent(fields[2]);
-                for (var i = 3; i < fields.Length; i++){
+                for (var i = 3; i < fields.Length; i++)
+                {
+                    var task = SplitAndFindTask(fields[i]);
+                    if (task == null) continue;
                     //Preferences
-                    if(i < m_preferences.MaxPreferences)
+                    if (i - 3 < m_preferences.MaxPreferences)
                     {
-                        var prefTask = SplitAndFindTask(fields[i]);
-                        if (prefTask != null)
-                        {
-                            newAgent.AddPreferredTask(prefTask);
-                        }
+                        newAgent.AddPreferredTask(task);
                     }//Dislikes
                     else
                     {
-                        var impTask = SplitAndFindTask(fields[i]);
-                        if (impTask != null)
-                        {
-                            newAgent.AddImpossibleTask(impTask);
-                        }
+                        newAgent.AddImpossibleTask(task);
+
                     }
                 }
                 //Add to set of agents the new created one
-                m_agents.Add(newAgent);                
-            }
+                m_agents.Add(newAgent);
+            }            
 
             //Rebuild for visualization
             RebuildGrid();

@@ -859,7 +859,7 @@ namespace AssignmentProblem
                     var task = SplitAndFindTask(fields[i]);
                     if (task == null) continue;
                     //Preferences
-                    if (i - 3 < m_preferences.MaxPreferences)
+                    if (i - 3 <= m_preferences.MaxPreferences)
                     {
                         newAgent.AddPreferredTask(task);
                     }//Dislikes

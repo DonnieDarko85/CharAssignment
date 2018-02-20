@@ -59,14 +59,17 @@ namespace AssignmentProblem
 	{
 		#region constants
 
-		private readonly Color[] c_colors = { Color.Green,
-												Color.LightGreen,
-												Color.GreenYellow,
-												Color.Yellow,
-												Color.Orange,
-												Color.OrangeRed,
-												Color.Red,
-												Color.DarkRed };
+	    private readonly Color[] _cellColors =
+	    {
+	        Color.Green,
+	        Color.LightGreen,
+	        Color.GreenYellow,
+	        Color.Yellow,
+	        Color.Orange,
+	        Color.OrangeRed,
+	        Color.Red,
+	        Color.DarkRed
+	    };
 		#endregion
 
 		#region variables
@@ -74,43 +77,46 @@ namespace AssignmentProblem
         /// <summary>
         /// CSV separator, use comma per default options
         /// </summary>
-        private static string _separator = ",";
+        private static readonly string _separator = ",";
 
 		/// <summary>
 		/// List containing all tasks, identified by GUID
 		/// </summary>
-		//private List<Tuple<Guid, string>> m_tasks = new List<Tuple<Guid, string>>();
-		private List<Task> m_tasks = new List<Task>();
+		//private List<Tuple<Guid, string>> _tasks = new List<Tuple<Guid, string>>();
+		private List<Task> _tasks = new List<Task>();
 
         /// <summary>
         /// Result of ssignment computation
         /// </summary>
-	    private List<int> m_assignment = null;
+	    private List<int> _assignment = null;
 
 		/// <summary>
 		/// List containing all agents, identified by GUID
 		/// including preferences (ordered by most to least preferred)
 		/// and impossible tasks (in no particular order)
 		/// </summary>
-		//private List<Tuple<Guid, string, List<Guid>, List<Guid>>> m_agents = new List<Tuple<Guid, string, List<Guid>, List<Guid>>>();
-		private List<Agent> m_agents = new List<Agent>();
+		//private List<Tuple<Guid, string, List<Guid>, List<Guid>>> _agents = new List<Tuple<Guid, string, List<Guid>, List<Guid>>>();
+		private List<Agent> _agents = new List<Agent>();
 
 		/// <summary>
 		/// The Main Data Grid that shows all agent-task-costs and the final result
 		/// </summary>
-		private DataGrid m_mainTable = new DataGrid();
+		private DataGrid _mainTable = new DataGrid();
 
 		/// <summary>
 		/// Cost of non-preferred tasks is this factor times #maximum preferences
 		/// </summary>
-		private int m_nonPreferenceFactor = 5;
+		private int _nonPreferenceFactor = 30;
 
 		/// <summary>
 		/// Cost of impossible tasks is this factor times #maximum preferences
 		/// </summary>
-		private int m_impossibleFactor = 20;
+		private int _impossibleFactor = 1000;
 
-		private Preferences m_preferences = new Preferences();
+        /// <summary>
+        /// Preferences mapping
+        /// </summary>
+		private readonly Preferences _preferences = new Preferences();
 		#endregion
 
 		#region methods
@@ -118,7 +124,7 @@ namespace AssignmentProblem
 		{
 			InitializeComponent();
 
-			m_preferences.Load();
+			_preferences.Load();
 			UpdateLabels();
 
 			MainTable.AllowUserToDeleteRows = false;
@@ -131,47 +137,46 @@ namespace AssignmentProblem
 
 		private void AddAgentButton_Click(object sender, EventArgs e)
 		{
-			Agent newAgent = Prompt.AgentPrompt("Enter " + m_preferences.Agent + " name (optional):", "Add new " + m_preferences.Agent, m_tasks, m_preferences);
+			var newAgent = Prompt.AgentPrompt("Enter " + _preferences.Agent + " name (optional):", "Add new " + _preferences.Agent, _tasks, _preferences);
 
 			// Cancelled?
-			if (newAgent != null)
-			{
-				m_agents.Add(newAgent);
-				RebuildGrid();
-			}
+		    if (newAgent == null) return;
+
+		    _agents.Add(newAgent);
+		    RebuildGrid();
 		}
 
         private static int _lastAgentUsedIndex;
 
 		private void AddRandomAgentButton_Click(object sender, EventArgs e)
 		{
-			Random rnd = new Random();
-            Agent newAgent = new Agent("Giocatore " + _lastAgentUsedIndex++);
+			var rnd = new Random();
+            var newAgent = new Agent("Giocatore " + _lastAgentUsedIndex++);
 			Task currentTask;
 
-			for (int i = 0; i < Math.Min(m_preferences.MaxPreferences, m_tasks.Count); i++)
+			for (var i = 0; i < Math.Min(_preferences.MaxPreferences, _tasks.Count); i++)
 			{
 				do
 				{
-					int taskID = rnd.Next(m_tasks.Count);
-					currentTask = m_tasks[taskID];
+					var taskId = rnd.Next(_tasks.Count);
+					currentTask = _tasks[taskId];
 				}
 				while (newAgent.PreferredTasks.Contains(currentTask));
 				newAgent.AddPreferredTask(currentTask);
 			}
 
-			if (m_tasks.Count > m_preferences.MaxPreferences)
+			if (_tasks.Count > _preferences.MaxPreferences)
 			{
 				do
 				{
-					int taskID = rnd.Next(m_tasks.Count);
-					currentTask = m_tasks[taskID];
+                    var taskId = rnd.Next(_tasks.Count);
+					currentTask = _tasks[taskId];
 				}
 				while (newAgent.PreferredTasks.Contains(currentTask) || newAgent.ImpossibleTasks.Contains(currentTask));
 				newAgent.AddImpossibleTask(currentTask);
 			}
 
-			m_agents.Add(newAgent);
+			_agents.Add(newAgent);
 
 			RebuildGrid();
 		}
@@ -193,8 +198,7 @@ namespace AssignmentProblem
 		/// <param name="e"></param>
 		private void AddJobButton_Click(object sender, EventArgs e)
 		{
-			string jobName = string.Empty;
-			jobName = Prompt.SingleStringPrompt("Please enter a name for " + m_preferences.Task + " # " + m_tasks.Count.ToString() + ":", "New " + m_preferences.Task);
+		    var jobName = Prompt.SingleStringPrompt("Please enter a name for " + _preferences.Task + " # " + _tasks.Count + ":", "New " + _preferences.Task);
 
 			// Cancel
 			if (jobName == string.Empty)
@@ -218,9 +222,9 @@ namespace AssignmentProblem
                 newTask.PgNumber = p_posId;
             }
 
-			m_tasks.Add(newTask);
+			_tasks.Add(newTask);
 
-			string statusMessage = "New " + m_preferences.Task + " (# " + (m_tasks.Count - 1).ToString() + ") added";
+			string statusMessage = "New " + _preferences.Task + " (# " + (_tasks.Count - 1).ToString() + ") added";
 			if (p_taskName != string.Empty)
 			{
 				statusMessage += ", named '" + newTask.Name + "'";
@@ -248,26 +252,19 @@ namespace AssignmentProblem
 		/// <param name="assignment">If assignment exists, show optimal assignment in DataGrid</param>
 		private void RebuildGrid(List<int> assignment = null)
 		{
-			m_mainTable = new DataGrid();
+			_mainTable = new DataGrid();
 
 			MainTable.SelectionMode = DataGridViewSelectionMode.RowHeaderSelect;
 			MainTable.ClearSelection();
 
 			// Setup table columns
-			MainTable.ColumnCount = m_tasks.Count;
+			MainTable.ColumnCount = _tasks.Count;
 
 			// Iterate over jobs and set column names and column ids within tasks
-			for (int i = 0; i < m_tasks.Count; i++)
+			for (var i = 0; i < _tasks.Count; i++)
 			{
-				m_tasks[i].PosID = i;
-                if (string.IsNullOrEmpty(MainTable.Columns[i].Name))
-                {
-                    MainTable.Columns[i].Name = m_tasks[i].GetIDName();
-                }
-                else
-                {
-                    MainTable.Columns[i].Name = m_tasks[i].GetNumberAndName();
-                }
+				_tasks[i].PosID = i;
+                MainTable.Columns[i].Name = string.IsNullOrEmpty(MainTable.Columns[i].Name) ? _tasks[i].GetIDName() : _tasks[i].GetNumberAndName();
 				MainTable.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
 			}
 
@@ -277,48 +274,42 @@ namespace AssignmentProblem
 			if (MainTable.ColumnCount > 0)
 			{
 				// Iterate over agents and set row names and show preferences/cost
-				for (int i = 0; i < m_agents.Count; i++)
+				for (var i = 0; i < _agents.Count; i++)
 				{
-					Agent currentAgent = m_agents[i];
+					var currentAgent = _agents[i];
 
 					MainTable.Rows.Add();
 					currentAgent.PosID = i;
 					MainTable.Rows[i].HeaderCell.Value = currentAgent.GetIDName();
 
 					// Colur all cells red by default, set higher cost value
-					for (int j = 0; j < m_tasks.Count; j++)
+					for (var j = 0; j < _tasks.Count; j++)
 					{
-						MainTable.Rows[i].Cells[j].Value = m_preferences.MaxPreferences * m_nonPreferenceFactor;
-						MainTable.Rows[i].Cells[j].Style.ForeColor = Color.White;
+						MainTable.Rows[i].Cells[j].Value = _nonPreferenceFactor;
+                        MainTable.Rows[i].Cells[j].Style.ForeColor = Color.Black;
 						MainTable.Rows[i].Cells[j].Style.BackColor = Color.White;
 					}
 
 					// Iterate over preferences to colour the DataGrid appropriately
-					for (int prefID = 0; prefID < currentAgent.PreferredTasks.Count; prefID++)
+					for (var prefId = 0; prefId < currentAgent.PreferredTasks.Count; prefId++)
 					{
-						Task preference = currentAgent.PreferredTasks[prefID];
-						int taskID = preference.PosID;
+						var preference = currentAgent.PreferredTasks[prefId];
+						var taskId = preference.PosID;
 
-						MainTable.Rows[i].Cells[taskID].Value = (prefID + 1).ToString();
-						if (assignment == null)
-						{
-							MainTable.Rows[i].Cells[taskID].Style.ForeColor = Color.Black;
-                            MainTable.Rows[i].Cells[taskID].Style.BackColor = c_colors[prefID >= c_colors.Length ? c_colors.Length - 1 : prefID];
-						}
+						MainTable.Rows[i].Cells[taskId].Value = (prefId + 1).ToString();
+
+					    if (assignment != null) continue;
+
+					    MainTable.Rows[i].Cells[taskId].Style.ForeColor = Color.Black;
+					    MainTable.Rows[i].Cells[taskId].Style.BackColor = _cellColors[prefId >= _cellColors.Length ? _cellColors.Length - 1 : prefId];
 					}
 
 					// Iterate over preferences to colour the DataGrid appropriately
-					for (int choiceID = 0; choiceID < currentAgent.ImpossibleTasks.Count; choiceID++)
+					foreach (var taskId in currentAgent.ImpossibleTasks.Select(impossible => impossible.PosID).Where(taskId => assignment == null))
 					{
-						Task impossible = currentAgent.ImpossibleTasks[choiceID];
-						int taskID = impossible.PosID;
-
-						if (assignment == null)
-						{
-							MainTable.Rows[i].Cells[taskID].Value = m_preferences.MaxPreferences * m_impossibleFactor;
-							MainTable.Rows[i].Cells[taskID].Style.ForeColor = Color.Black;
-							MainTable.Rows[i].Cells[taskID].Style.BackColor = Color.Black;
-						}
+					    MainTable.Rows[i].Cells[taskId].Value = _impossibleFactor;
+                        MainTable.Rows[i].Cells[taskId].Style.ForeColor = Color.White;
+					    MainTable.Rows[i].Cells[taskId].Style.BackColor = Color.Black;
 					}
 				}
 
@@ -395,15 +386,15 @@ namespace AssignmentProblem
 		/// <returns></returns>
 		private bool XMLToDataGrid(XmlDocument dataGridXML)
 		{
-			m_tasks = new List<Task>();
-			m_agents = new List<Agent>();
+			_tasks = new List<Task>();
+			_agents = new List<Agent>();
 
 			// Parse tasks
 			XmlNodeList tasks = dataGridXML.SelectNodes("//Assignment/Tasks/Task");
 			foreach (XmlNode node in tasks)
 			{
 				string taskName = node.Attributes["Name"].Value;
-				m_tasks.Add(new Task(taskName));
+				_tasks.Add(new Task(taskName));
 			}
 
 			// Parse agents
@@ -418,7 +409,7 @@ namespace AssignmentProblem
 				foreach (XmlNode prefNode in prefTasks)
 				{
 					int posID = Int32.Parse(prefNode.Attributes["PosID"].Value);
-					agent.PreferredTasks.Add(m_tasks[posID]);
+					agent.PreferredTasks.Add(_tasks[posID]);
 				}
 
 				// Parse impossible items
@@ -426,10 +417,10 @@ namespace AssignmentProblem
 				foreach (XmlNode impNode in impTasks)
 				{
 					int posID = Int32.Parse(impNode.Attributes["PosID"].Value);
-					agent.ImpossibleTasks.Add(m_tasks[posID]);
+					agent.ImpossibleTasks.Add(_tasks[posID]);
 				}
 
-				m_agents.Add(agent);
+				_agents.Add(agent);
 			}
 
 			RebuildGrid();
@@ -456,7 +447,7 @@ namespace AssignmentProblem
 			newRoot.AppendChild(tasks);
 
 			// Iterate over tasks, create task nodes
-			foreach (Task task in m_tasks)
+			foreach (Task task in _tasks)
 			{
 				XmlElement taskXML = dataGridXML.CreateElement("Task");
 
@@ -472,7 +463,7 @@ namespace AssignmentProblem
 			newRoot.AppendChild(agents);
 
 			// Iterate over agents, create agent nodes
-			foreach (Agent agent in m_agents)
+			foreach (Agent agent in _agents)
 			{
 				XmlElement agentXML = dataGridXML.CreateElement("Agent");
 
@@ -557,13 +548,13 @@ namespace AssignmentProblem
 				int index = MainTable.SelectedRows[0].Index;
 
 				// Erase agent from agent list
-				Agent agentToRemove = m_agents.ElementAt(index);
+				Agent agentToRemove = _agents.ElementAt(index);
 
 				if (agentToRemove != null)
 				{
-					m_agents.RemoveAt(index);
+					_agents.RemoveAt(index);
 
-					string statusMessage = "Removed " + m_preferences.Agent + " # " + agentToRemove.GetIDName();
+					string statusMessage = "Removed " + _preferences.Agent + " # " + agentToRemove.GetIDName();
 					SetStatus(statusMessage);
 
 					RebuildGrid();
@@ -583,10 +574,10 @@ namespace AssignmentProblem
 				int index = MainTable.SelectedColumns[0].Index;
 
 				// Rename Task
-				Task taskToRename = m_tasks.ElementAt(index);
+				Task taskToRename = _tasks.ElementAt(index);
 				string oldName = taskToRename.Name;
 
-				string newName = Prompt.SingleStringPrompt("Enter new name for " + m_preferences.Task + ":", "Rename task", oldName);
+				string newName = Prompt.SingleStringPrompt("Enter new name for " + _preferences.Task + ":", "Rename task", oldName);
 				if (newName != string.Empty)
 				{
 					taskToRename.Name = newName;
@@ -608,19 +599,19 @@ namespace AssignmentProblem
 				int index = MainTable.SelectedColumns[0].Index;
 
 				// Erase agent from agent list
-				Task taskToRemove = m_tasks.ElementAt(index);
+				Task taskToRemove = _tasks.ElementAt(index);
 
 				if (taskToRemove != null)
 				{
-					m_tasks.RemoveAt(index);
+					_tasks.RemoveAt(index);
 
 					// Iterate over agents, remove task from all lists
-					foreach (Agent agent in m_agents)
+					foreach (Agent agent in _agents)
 					{
 						agent.RemoveTask(taskToRemove);
 					}
 
-					string statusMessage = "Removed " + m_preferences.Task + " # " + taskToRemove.GetIDName();
+					string statusMessage = "Removed " + _preferences.Task + " # " + taskToRemove.GetIDName();
 					SetStatus(statusMessage);
 
 					RebuildGrid();
@@ -636,20 +627,20 @@ namespace AssignmentProblem
 		private void CalculateButton_Click(object sender, EventArgs e)
 		{
 			// Check if Matrix is n x n
-			if (m_agents.Count < m_tasks.Count)
+			if (_agents.Count < _tasks.Count)
 			{
-				SetStatus("Error: Too many " + m_preferences.Task + "s for number of " + m_preferences.Agent + "s!");
+				SetStatus("Error: Too many " + _preferences.Task + "s for number of " + _preferences.Agent + "s!");
 				return;
 			}
-			if (m_agents.Count > m_tasks.Count)
+			if (_agents.Count > _tasks.Count)
 			{
-				SetStatus("Error: Too many " + m_preferences.Agent + "s for number of " + m_preferences.Task + "s!");
+				SetStatus("Error: Too many " + _preferences.Agent + "s for number of " + _preferences.Task + "s!");
 				return;
 			}
 
-			var matrixSize = m_agents.Count;
+			var matrixSize = _agents.Count;
 
-		    m_assignment = null;
+		    _assignment = null;
 			// Read matrix from DataGrid
 			/*var costs = new List<int>();
 
@@ -666,10 +657,10 @@ namespace AssignmentProblem
 
 			// Start matrix calculation
 			var mm = new MatrixMath(matrixSize, costs);
-			m_assignment = mm.Calculate();
+			_assignment = mm.Calculate();
 
 			// Show result in DataGrid
-            RebuildGrid(m_assignment);
+            RebuildGrid(_assignment);
 		}
 
 		/// <summary>
@@ -714,9 +705,9 @@ namespace AssignmentProblem
 		/// <param name="e"></param>
 		private void OptionsButton_Click(object sender, EventArgs e)
 		{
-		    if (!Prompt.ChangePreferences(m_preferences)) return;
+		    if (!Prompt.ChangePreferences(_preferences)) return;
 
-		    m_preferences.Save();
+		    _preferences.Save();
 
 		    UpdateLabels();
 		}
@@ -729,12 +720,12 @@ namespace AssignmentProblem
         private void DummyFillButton_Click(object sender, EventArgs e)
         {
             int difference;
-            if ((difference = m_tasks.Count - m_agents.Count) == 0) return;
+            if ((difference = _tasks.Count - _agents.Count) == 0) return;
 
             for (var i = 0; i < difference; i++)
             {
                 var newAgent = new Agent("dummy");
-                m_agents.Add(newAgent);
+                _agents.Add(newAgent);
                 RebuildGrid();
             }
         }
@@ -742,22 +733,22 @@ namespace AssignmentProblem
 		private void UpdateLabels()
 		{
 			// Labels
-			AddRoleLabel.Text = "1. Add all " + m_preferences.Task + "s.\n\n   Names for " + m_preferences.Task + "s are optional\n\n    + button adds unnamed " + m_preferences.Task;
-			AddPlayerLabel.Text = "2. Add all " + m_preferences.Agent + "s\n    Including their preferences\n    and invalid choices (wrong age)\n\n    +button adds random " + m_preferences.Agent + "\n    for testing purposes";
+			AddRoleLabel.Text = "1. Add all " + _preferences.Task + "s.\n\n   Names for " + _preferences.Task + "s are optional\n\n    + button adds unnamed " + _preferences.Task;
+			AddPlayerLabel.Text = "2. Add all " + _preferences.Agent + "s\n    Including their preferences\n    and invalid choices (wrong age)\n\n    +button adds random " + _preferences.Agent + "\n    for testing purposes";
 
 			// Buttons
-			AddTaskButton.Text = "Add " + m_preferences.Task;
-			ModifyTaskButton.Text = "Rename " + m_preferences.Task;
-			DeleteTaskButton.Text = "Delete " + m_preferences.Task;
+			AddTaskButton.Text = "Add " + _preferences.Task;
+			ModifyTaskButton.Text = "Rename " + _preferences.Task;
+			DeleteTaskButton.Text = "Delete " + _preferences.Task;
 
-			AddAgentButton.Text = "Add " + m_preferences.Agent;
-			ModifyAgentButton.Text = "Modify " + m_preferences.Agent;
-			DeleteAgentButton.Text = "Delete " + m_preferences.Agent;
+			AddAgentButton.Text = "Add " + _preferences.Agent;
+			ModifyAgentButton.Text = "Modify " + _preferences.Agent;
+			DeleteAgentButton.Text = "Delete " + _preferences.Agent;
 		}
 
         private void ExportButton_Click(object sender, EventArgs e)
         {
-            if (m_assignment == null)
+            if (_assignment == null)
             {
                 SetStatus("No assignment to save, please calculate it first!");
                 return;
@@ -775,15 +766,15 @@ namespace AssignmentProblem
 	        var assignmentOutput = string.Empty;
 	        var toRemoveOutput = string.Empty;
            
-            for (var i = 0; i < m_agents.Count; i++)
+            for (var i = 0; i < _agents.Count; i++)
 	        {
-	            var index = m_assignment[i];
+	            var index = _assignment[i];
 
-                if (m_agents[i].Name.Equals("dummy")) continue;
+                if (_agents[i].Name.Equals("dummy")) continue;
 
-                toRemoveOutput += m_tasks[index].GetNumberAndName() + "\n";
-	            assignmentOutput += m_agents[i].Name + _separator + m_tasks[index].GetNumberAndName() + _separator +
-                                    (m_agents[i].PreferredTasks.IndexOf(m_tasks[index]) + 1) + "\n";
+                toRemoveOutput += _tasks[index].GetNumberAndName() + "\n";
+	            assignmentOutput += _agents[i].Name + _separator + _tasks[index].GetNumberAndName() + _separator +
+                                    (_agents[i].PreferredTasks.IndexOf(_tasks[index]) + 1) + "\n";
 	        }
 
 	        File.WriteAllText(fileName, assignmentOutput, Encoding.UTF8);
@@ -801,8 +792,8 @@ namespace AssignmentProblem
 
             if (openFileDialog.ShowDialog() != DialogResult.OK) return;
 
-            m_tasks.Clear();
-            m_agents.Clear();
+            _tasks.Clear();
+            _agents.Clear();
 
             var allPg = File.ReadAllLines(openFileDialog.FileName);
 
@@ -835,7 +826,7 @@ namespace AssignmentProblem
 
             if (openFileDialog.ShowDialog() != DialogResult.OK) return;
 
-            m_agents.Clear();
+            _agents.Clear();
 
             var parser = new TextFieldParser(openFileDialog.FileName)
             {
@@ -853,13 +844,13 @@ namespace AssignmentProblem
                 if (fields == null) continue;
 
                 //Create player
-                var newAgent = new Agent(fields[2]);
-                for (var i = 3; i < fields.Length; i++)
+                var newAgent = new Agent(fields[0]);
+                for (var i = 2; i < fields.Length; i++)
                 {
                     var task = SplitAndFindTask(fields[i]);
                     if (task == null) continue;
                     //Preferences
-                    if (i - 3 <= m_preferences.MaxPreferences)
+                    if (i - 1 <= _preferences.MaxPreferences)
                     {
                         newAgent.AddPreferredTask(task);
                     }//Dislikes
@@ -870,7 +861,7 @@ namespace AssignmentProblem
                     }
                 }
                 //Add to set of agents the new created one
-                m_agents.Add(newAgent);
+                _agents.Add(newAgent);
             }            
 
             //Rebuild for visualization
@@ -880,7 +871,7 @@ namespace AssignmentProblem
         private Task SplitAndFindTask(string complexName)
         {
             var splitted = complexName.Split('|');
-            if (splitted.Length == 2) return m_tasks.Find(x => x.Equals(new Task(splitted[1].Trim())));
+            if (splitted.Length == 2) return _tasks.Find(x => x.Equals(new Task(splitted[1].Trim())));
 
             //Error
             SetStatus("Bad format of imported file");

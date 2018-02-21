@@ -41,54 +41,54 @@ namespace AssignmentProblem
 {
 	public class Agent : NamedEntity
 	{
-		private List<Task> preferredTasks = new List<Task>();
+	    private readonly List<Task> _preferredTasks = new List<Task>();
+        private readonly List<Task> _impossibleTasks = new List<Task>();
+	    public int RoleMultiplier { get ; set; }
 
-		private List<Task> impossibleTasks = new List<Task>();
+	    public List<Task> PreferredTasks
+	    {
+	        get { return _preferredTasks; }
+	    }
 
-		public List<Task> PreferredTasks
-		{
-			get
-			{
-				return preferredTasks;
-			}
+	    public List<Task> ImpossibleTasks
+	    {
+	        get { return _impossibleTasks; }
+	    }
+
+	    public Agent(string pName = "")
+	    {
+	        RoleMultiplier = 1;
+			Name = pName;
 		}
 
-		public List<Task> ImpossibleTasks
+	    public Agent()
+	    {
+	        RoleMultiplier = 1;
+	    }
+
+	    public void AddPreferredTask(Task pPreferred)
 		{
-			get
-			{
-				return impossibleTasks;
-			}
+			PreferredTasks.Add(pPreferred);
 		}
 
-		public Agent(string p_name = "")
+		public void AddImpossibleTask(Task pImpossible)
 		{
-			Name = p_name;
-		}
-
-		public void AddPreferredTask(Task p_preferred)
-		{
-			preferredTasks.Add(p_preferred);
-		}
-
-		public void AddImpossibleTask(Task p_impossible)
-		{
-			impossibleTasks.Add(p_impossible);
+			ImpossibleTasks.Add(pImpossible);
 		}
 
 		/// <summary>
 		/// Remove Task from all lists of agent
 		/// </summary>
-		/// <param name="p_taskToRemove"></param>
-		public void RemoveTask(Task p_taskToRemove)
+		/// <param name="pTaskToRemove"></param>
+		public void RemoveTask(Task pTaskToRemove)
 		{
-			int position = PreferredTasks.IndexOf(p_taskToRemove);
+			int position = PreferredTasks.IndexOf(pTaskToRemove);
 			if (position != -1)
 			{
 				PreferredTasks.RemoveAt(position);
 			}
 
-			position = ImpossibleTasks.IndexOf(p_taskToRemove);
+			position = ImpossibleTasks.IndexOf(pTaskToRemove);
 			if (position != -1)
 			{
 				ImpossibleTasks.RemoveAt(position);

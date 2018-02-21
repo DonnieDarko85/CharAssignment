@@ -271,12 +271,16 @@ namespace AssignmentProblem
 			// Setup table rows
 			MainTable.Rows.Clear();
 
+            // Multiplier
+		    var roleMultiplier = 1;
+
 			if (MainTable.ColumnCount > 0)
 			{
 				// Iterate over agents and set row names and show preferences/cost
 				for (var i = 0; i < _agents.Count; i++)
 				{
 					var currentAgent = _agents[i];
+				    roleMultiplier = currentAgent.RoleMultiplier;
 
 					MainTable.Rows.Add();
 					currentAgent.PosID = i;
@@ -285,7 +289,7 @@ namespace AssignmentProblem
 					// Colur all cells red by default, set higher cost value
 					for (var j = 0; j < _tasks.Count; j++)
 					{
-						MainTable.Rows[i].Cells[j].Value = _nonPreferenceFactor;
+                        MainTable.Rows[i].Cells[j].Value = _nonPreferenceFactor * roleMultiplier;
                         MainTable.Rows[i].Cells[j].Style.ForeColor = Color.Black;
 						MainTable.Rows[i].Cells[j].Style.BackColor = Color.White;
 					}
@@ -296,7 +300,7 @@ namespace AssignmentProblem
 						var preference = currentAgent.PreferredTasks[prefId];
 						var taskId = preference.PosID;
 
-						MainTable.Rows[i].Cells[taskId].Value = (prefId + 1).ToString();
+                        MainTable.Rows[i].Cells[taskId].Value = ((prefId + 1) * roleMultiplier).ToString();
 
 					    if (assignment != null) continue;
 
@@ -307,7 +311,7 @@ namespace AssignmentProblem
 					// Iterate over preferences to colour the DataGrid appropriately
 					foreach (var taskId in currentAgent.ImpossibleTasks.Select(impossible => impossible.PosID).Where(taskId => assignment == null))
 					{
-					    MainTable.Rows[i].Cells[taskId].Value = _impossibleFactor;
+                        MainTable.Rows[i].Cells[taskId].Value = _impossibleFactor * roleMultiplier;
                         MainTable.Rows[i].Cells[taskId].Style.ForeColor = Color.White;
 					    MainTable.Rows[i].Cells[taskId].Style.BackColor = Color.Black;
 					}
@@ -845,6 +849,12 @@ namespace AssignmentProblem
 
                 //Create player
                 var newAgent = new Agent(fields[0]);
+                var adjustedRoleType = fields[1].Trim().ToLower();
+
+                if ("produttore associato".Equals(adjustedRoleType)) newAgent.RoleMultiplier = 12;
+                else if ("sostenitore".Equals(adjustedRoleType)) newAgent.RoleMultiplier = 4;
+                else newAgent.RoleMultiplier = 1;
+                    
                 for (var i = 2; i < fields.Length; i++)
                 {
                     var task = SplitAndFindTask(fields[i]);

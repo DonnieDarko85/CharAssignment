@@ -193,6 +193,102 @@ namespace AssignmentProblem
 			return prompt.ShowDialog() == DialogResult.OK ? agent : null;
 		}
 
+        public static Agent EditAgentPrompt(string text, string caption, List<Task> p_tasks, Preferences p_preferences)
+        {
+            Agent agent = new Agent();
+
+            Form prompt = new Form()
+            {
+                Width = 500,
+                Height = 230 + p_preferences.MaxPreferences * 30 + p_preferences.MaxImpossible * 30,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                Text = caption,
+                StartPosition = FormStartPosition.CenterScreen
+            };
+            Label textLabel = new Label() { Left = 50, Top = 20, Width = 400, Text = text };
+            TextBox textBox = new TextBox() { Left = 50, Top = 35, Width = 400 };
+
+            Label textLabelPref = new Label() { Left = 50, Top = 70, Width = 400, Text = "Preferences - in order from most to less preferred (max. " + p_preferences.MaxPreferences.ToString() + "):" };
+
+            // Create drop-down combo boxes for preferences
+            List<ComboBox> prefDropDowns = new List<ComboBox>();
+            for (int i = 0; i < p_preferences.MaxPreferences; i++)
+            {
+                ComboBox newDropDown = new ComboBox() { Left = 50, Top = 90 + i * 30, Width = 400 };
+
+                newDropDown.Items.Add("none");
+                foreach (Task task in p_tasks)
+                {
+                    newDropDown.Items.Add(task.GetNumberAndName());
+                }
+                newDropDown.SelectedIndex = 0;
+
+                newDropDown.DropDownStyle = ComboBoxStyle.DropDownList;
+                prompt.Controls.Add(newDropDown);
+                prefDropDowns.Add(newDropDown);
+            }
+            int topPosition = 80 + p_preferences.MaxPreferences * 30;
+
+            Label textLabelImpos = new Label() { Left = 50, Top = topPosition + 20, Width = 400, Text = "Disliked/Impossible " + p_preferences.Task + "s - in no particular order (max. " + p_preferences.MaxImpossible.ToString() + "):" };
+
+            // Create drop-down combo boxes for impossible tasks
+            List<ComboBox> impDropDowns = new List<ComboBox>();
+            for (int i = 0; i < p_preferences.MaxImpossible; i++)
+            {
+                ComboBox newDropDown = new ComboBox() { Left = 50, Top = topPosition + 45 + i * 30, Width = 400 };
+
+                newDropDown.Items.Add("none");
+                foreach (Task task in p_tasks)
+                {
+                    newDropDown.Items.Add(task.GetNumberAndName());
+                }
+                newDropDown.SelectedIndex = 0;
+
+                newDropDown.DropDownStyle = ComboBoxStyle.DropDownList;
+                prompt.Controls.Add(newDropDown);
+                impDropDowns.Add(newDropDown);
+            }
+
+            topPosition += 45 + p_preferences.MaxImpossible * 30;
+
+            Button confirmation = new Button() { Text = "Ok", Left = 240, Width = 100, Height = 34, Top = topPosition + 10, DialogResult = DialogResult.OK };
+            Button cancel = new Button() { Text = "Cancel", Left = 350, Width = 100, Height = 34, Top = topPosition + 10, DialogResult = DialogResult.Cancel };
+
+            confirmation.Click += (sender, e) =>
+            {
+                agent.Name = textBox.Text;
+                prompt.Close();
+
+                // Iterate over dropdowns to get preferences
+                foreach (ComboBox dropDown in prefDropDowns)
+                {
+                    if (dropDown.SelectedIndex != 0)
+                    {
+                        agent.PreferredTasks.Add(p_tasks[dropDown.SelectedIndex - 1]);
+                    }
+                }
+
+                // Iterate over dropdowns to get preferences
+                foreach (ComboBox dropDown in impDropDowns)
+                {
+                    if (dropDown.SelectedIndex != 0)
+                    {
+                        agent.ImpossibleTasks.Add(p_tasks[dropDown.SelectedIndex - 1]);
+                    }
+                }
+            };
+            cancel.Click += (sender, e) => { prompt.Close(); };
+            prompt.Controls.Add(textBox);
+            prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(cancel);
+            prompt.Controls.Add(textLabel);
+            prompt.Controls.Add(textLabelPref);
+            prompt.Controls.Add(textLabelImpos);
+            prompt.AcceptButton = confirmation;
+
+            return prompt.ShowDialog() == DialogResult.OK ? agent : null;
+        }
+
 		public static string SaveFileDialog()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();

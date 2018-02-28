@@ -55,9 +55,16 @@ namespace AssignmentProblem
 		- print results in text window
 		- auto color range  
   	*/
-	public partial class RoleAssignmentHelper : Form
-	{
-		#region constants
+
+    public partial class RoleAssignmentHelper : Form
+    {
+        #region constants
+
+        private readonly int[] _costsProgression =
+        {
+            1, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+            33
+        };
 
 	    private readonly Color[] _cellColors =
 	    {
@@ -133,6 +140,8 @@ namespace AssignmentProblem
 			MainTable.AllowUserToOrderColumns = false;
 			MainTable.AllowDrop = false;
 			MainTable.SelectionMode = DataGridViewSelectionMode.RowHeaderSelect;
+            MainTable.EditMode = DataGridViewEditMode.EditOnEnter;
+		    ModifyAgentButton.Enabled = false;
 		}
 
 		private void AddAgentButton_Click(object sender, EventArgs e)
@@ -300,7 +309,7 @@ namespace AssignmentProblem
 						var preference = currentAgent.PreferredTasks[prefId];
 						var taskId = preference.PosID;
 
-                        MainTable.Rows[i].Cells[taskId].Value = ((prefId + 1) * roleMultiplier).ToString();
+                        MainTable.Rows[i].Cells[taskId].Value = (_costsProgression[prefId] * roleMultiplier).ToString();
 
 					    if (assignment != null) continue;
 
@@ -519,12 +528,10 @@ namespace AssignmentProblem
 			if (MainTable.SelectedRows.Count == 1)
 			{
 				DeleteAgentButton.Enabled = true;
-				ModifyAgentButton.Enabled = true;
 			}
 			else
 			{
 				DeleteAgentButton.Enabled = false;
-				ModifyAgentButton.Enabled = false;
 			}
 
 			// Column selected?
